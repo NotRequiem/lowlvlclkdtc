@@ -10,8 +10,13 @@ DWORD lastClickTime = 0;
 
 LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
-        if (wParam != 512 && wParam != 514 && wParam != 517 && wParam != 520 && wParam != 522 && wParam != 524 && wParam != 526 && wParam != 675) {
-            wParamCounts[wParam]++;
+        MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
+
+        // Check if the message is not injected (real mouse event)
+        if (!(p->flags & LLMHF_INJECTED)) {
+            if (wParam != 512 && wParam != 514 && wParam != 517 && wParam != 520 && wParam != 522 && wParam != 524 && wParam != 526 && wParam != 675) {
+                wParamCounts[wParam]++;
+            }
         }
     }
 
@@ -26,7 +31,7 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (nCode >= 0 && wParam == maxWParam) {
             if (lastClickTime != 0) {
                 DWORD currentClickTime = GetTickCount64();
-                printf("Detected attack control: (%d). Delay between clicks: %d ms\n", maxWParam, currentClickTime - lastClickTime);
+                printf("Most triggered mouse event: (%d). Delay between last click: %d ms\n", maxWParam, currentClickTime - lastClickTime);
             }
             lastClickTime = GetTickCount64();
         }
