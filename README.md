@@ -1,6 +1,7 @@
 # Attack-Control-Delay
 
 Possible Attack Control values:
+
 513: Sent when the left mouse button is pressed.
 
 514: Sent when the left mouse button is released.
