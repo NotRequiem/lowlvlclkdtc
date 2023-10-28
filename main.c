@@ -7,33 +7,52 @@ DWORD StartTime;
 int wParamCounts[8] = {0};
 int maxWParam = 0;
 DWORD lastClickTime = 0;
+DWORD lastClickDelay = 0;
+DWORD lastWParamTime[8] = {0};
 
-LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
         MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
 
-        // Check if the message is not injected (real mouse event)
-        if (!(p->flags & LLMHF_INJECTED)) {
+        if (!(p->flags & (LLMHF_INJECTED | LLMHF_LOWER_IL_INJECTED))) {
             if (wParam != 512 && wParam != 514 && wParam != 517 && wParam != 520 && wParam != 522 && wParam != 524 && wParam != 526 && wParam != 675) {
                 wParamCounts[wParam]++;
             }
+
+        if (wParam == 514 || wParam == 517 || wParam == 520 || wParam == 524) {
+        DWORD currentWParamTime = GetTickCount64();
+        DWORD timeElapsed = currentWParamTime - lastWParamTime[wParam];
+
+        if (timeElapsed == lastClickDelay) {
+            printf("Mouse event (%d) occurred at the same time as the previous one. Event delay: %d ms\n", wParam, lastClickDelay);
+        }
+
+        lastWParamTime[wParam] = currentWParamTime;
+        }
+
+        } else {
+            printf("Autoclicker detected (Injection flag detected)\n");
         }
     }
 
     DWORD CurrentTime = GetTickCount64();
     DWORD ElapsedTime = CurrentTime - StartTime;
+    DWORD currentClickTime = GetTickCount64();
 
     if (ElapsedTime <= 5000) {
         if (wParamCounts[wParam] > wParamCounts[maxWParam]) {
             maxWParam = wParam;
         }
     } else {
-        if (nCode >= 0 && wParam == maxWParam) {
+        if (nCode == HC_ACTION && wParam == maxWParam) {
             if (lastClickTime != 0) {
-                DWORD currentClickTime = GetTickCount64();
-                printf("Most triggered mouse event: (%d). Delay between last click: %d ms\n", maxWParam, currentClickTime - lastClickTime);
+                DWORD clickDelay = currentClickTime - lastClickTime;
+
+                printf("Most triggered mouse event: (%d). Event delay: %d ms\n", maxWParam, clickDelay);
             }
+            
             lastClickTime = GetTickCount64();
+            lastClickDelay = currentClickTime - lastClickTime;
         }
     }
 
@@ -50,7 +69,7 @@ void UninstallHook() {
 }
 
 bool InstallHook() {
-    hHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)MouseProc, GetModuleHandle(NULL), 0);
+    hHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)LowLevelMouseProc, GetModuleHandle(NULL), 0);
     if (!hHook) {
         printf("Error installing mouse hook. Error code: %d\n", GetLastError());
         UninstallHook();
