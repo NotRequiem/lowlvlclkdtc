@@ -7,48 +7,51 @@ HHOOK hKeyboardHook;
 
 ULONG64 downTime;
 ULONG64 upTime;
+ULONG64 lastUpTime;
 ULONG64 timeInterval;
 
-int autoclickCount = 0;
-ULONG64 previousInterval = 0;
+// Separate autoclickCount variables for each mouse event
+int autoclickCountLeft = 0;
+int autoclickCountRight = 0;
+int autoclickCountMiddle = 0;
+int autoclickCountXButton = 0;
+
+ULONG64 previousIntervalLeft = 0;
+ULONG64 previousIntervalRight = 0;
+ULONG64 previousIntervalMiddle = 0;
+ULONG64 previousIntervalXButton = 0;
 
 ULONG64 downTimeLeft = 0;
 ULONG64 upTimeLeft = 0;
 ULONG64 timeIntervalLeft = 0;
-ULONG64 previousIntervalLeft = 0;
-int autoclickCountLeft = 0;
+ULONG64 lastUpTimeLeft = 0;
 
 ULONG64 downTimeRight = 0;
 ULONG64 upTimeRight = 0;
 ULONG64 timeIntervalRight = 0;
-ULONG64 previousIntervalRight = 0;
-int autoclickCountRight = 0;
+ULONG64 lastUpTimeRight = 0;
 
 ULONG64 downTimeMiddle = 0;
 ULONG64 upTimeMiddle = 0;
 ULONG64 timeIntervalMiddle = 0;
-ULONG64 previousIntervalMiddle = 0;
-int autoclickCountMiddle = 0;
+ULONG64 lastUpTimeMiddle = 0;
 
 ULONG64 downTimeXButton = 0;
 ULONG64 upTimeXButton = 0;
 ULONG64 timeIntervalXButton = 0;
-ULONG64 previousIntervalXButton = 0;
-int autoclickCountXButton = 0;
-
+ULONG64 lastUpTimeXButton = 0;
 
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
 
     if (nCode == HC_ACTION && !(p->flags & (LLMHF_INJECTED | LLMHF_LOWER_IL_INJECTED))) {
         ULONG64 now = GetTickCount64();
-        // Left mouse button is being clicked or double-clicked
-        if (wParam == 513 || wParam == 515) {
+
+        if (wParam == 513 || wParam == 515) { // Left mouse button is being clicked or double-clicked
             downTimeLeft = now;
         }
 
-        // Left mouse button is being released
-        if (wParam == 514) {
+        if (wParam == 514) { // Left mouse button is being released
             upTimeLeft = now;
             if (upTimeLeft < downTimeLeft) {
                 timeIntervalLeft = (ULLONG_MAX - downTimeLeft) + upTimeLeft + 1;
@@ -57,9 +60,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             }
 
             if (timeIntervalLeft == 0) {
-                printf("Autoclicker detected in the left mouse button: Delay is 0ms.\n");
+                printf("Autoclicker detected in the left mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last left button click and current time: %llums\n", timeIntervalLeft);
+                printf("Delay between last left mouse event and current time: %llums\n", timeIntervalLeft);
 
                 if (autoclickCountLeft == 0) {
                     previousIntervalLeft = timeIntervalLeft;
@@ -68,20 +71,25 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
 
                 if (autoclickCountLeft >= 10) {
-                    printf("Left Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalLeft);
+                    printf("Left Mouse Button Autoclick detected (No Randomization): %llums delay\n", timeIntervalLeft);
                 }
 
                 autoclickCountLeft++;
             }
+
+            lastUpTimeLeft = upTimeLeft;
         }
 
-        // Right mouse button is being clicked or double-clicked
-        if (wParam == 516 || wParam == 518) {
+        if (wParam == 513 || wParam == 515 && lastUpTimeLeft != 0) { // Left mouse button is being pressed again
+            timeInterval = downTimeLeft - lastUpTimeLeft;
+            printf("Autoclicker detected in the left mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+        }
+
+        if (wParam == 516 || wParam == 518) { // Right mouse button is being clicked or double-clicked
             downTimeRight = now;
         }
 
-        // Right mouse button is being released
-        if (wParam == 517) {
+        if (wParam == 517) { // Right mouse button is being released
             upTimeRight = now;
             if (upTimeRight < downTimeRight) {
                 timeIntervalRight = (ULLONG_MAX - downTimeRight) + upTimeRight + 1;
@@ -90,9 +98,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             }
 
             if (timeIntervalRight == 0) {
-                printf("Autoclicker detected in the right mouse button: Delay is 0ms.\n");
+                printf("Autoclicker detected in the right mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last right click and current time: %llums\n", timeIntervalRight);
+                printf("Delay between last right mouse event and current time: %llums\n", timeIntervalRight);
 
                 if (autoclickCountRight == 0) {
                     previousIntervalRight = timeIntervalRight;
@@ -101,20 +109,25 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
 
                 if (autoclickCountRight >= 10) {
-                    printf("Right Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalRight);
+                    printf("Right Mouse Button Autoclick detected (No Randomization): %llums delay\n", timeIntervalRight);
                 }
 
                 autoclickCountRight++;
             }
+
+            lastUpTimeRight = upTimeRight;
         }
 
-        // Middle mouse button is being clicked or double-clicked
-        if (wParam == 519 || wParam == 521) {
+        if (wParam == 516 || wParam == 518 && lastUpTimeRight != 0) { // Right mouse button is being pressed again
+            timeInterval = downTimeRight - lastUpTimeRight;
+            printf("Autoclicker detected in the right mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+        }
+
+        if (wParam == 519 || wParam == 521) { // Middle mouse button is being clicked or double-clicked
             downTimeMiddle = now;
         }
 
-        // Middle mouse button is being released
-        if (wParam == 520) {
+        if (wParam == 520) { // Middle mouse button is being released
             upTimeMiddle = now;
             if (upTimeMiddle < downTimeMiddle) {
                 timeIntervalMiddle = (ULLONG_MAX - downTimeMiddle) + upTimeMiddle + 1;
@@ -123,9 +136,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             }
 
             if (timeIntervalMiddle == 0) {
-                printf("Autoclicker detected in the middle mouse button: Delay is 0ms.\n");
+                printf("AAutoclicker detected in the middle mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last middle button click and current time: %llums\n", timeIntervalMiddle);
+                printf("Delay between last middle mouse event and current time: %llums\n", timeIntervalMiddle);
 
                 if (autoclickCountMiddle == 0) {
                     previousIntervalMiddle = timeIntervalMiddle;
@@ -134,20 +147,25 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
 
                 if (autoclickCountMiddle >= 10) {
-                    printf("Middle Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalMiddle);
+                    printf("Middle Mouse Button Autoclick detected (No Randomization): %llums delay\n", timeIntervalMiddle);
                 }
 
                 autoclickCountMiddle++;
             }
+
+            lastUpTimeMiddle = upTimeMiddle;
         }
 
-        // Extended mouse button (XBUTTON1 or XBUTTON2) is being clicked or double-clicked
-        if (wParam == 523 || wParam == 525) {
+        if (wParam == 519 && lastUpTimeMiddle != 0) { // Middle mouse button is being pressed again
+            timeInterval = downTimeMiddle - lastUpTimeMiddle;
+            printf("Autoclicker detected in the middle mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+        }
+
+        if (wParam == 523 || wParam == 525) { // Extended mouse button (XBUTTON1 or XBUTTON2) is being clicked or double-clicked
             downTimeXButton = now;
         }
 
-        // Extended mouse button (XBUTTON1 or XBUTTON2) is being released
-        if (wParam == 524) {
+        if (wParam == 524) { // Extended mouse button (XBUTTON1 or XBUTTON2) is being released
             upTimeXButton = now;
             if (upTimeXButton < downTimeXButton) {
                 timeIntervalXButton = (ULLONG_MAX - downTimeXButton) + upTimeXButton + 1;
@@ -156,9 +174,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             }
 
             if (timeIntervalXButton == 0) {
-                printf("Autoclicker detected in the extra side mouse button: Delay is 0ms.\n");
+                printf("Autoclicker detected in the extended mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last XBUTTON click and current time: %llums\n", timeIntervalXButton);
+                printf("Delay between last XBUTTON mouse event and current time: %llums\n", timeIntervalXButton);
 
                 if (autoclickCountXButton == 0) {
                     previousIntervalXButton = timeIntervalXButton;
@@ -167,17 +185,24 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 }
 
                 if (autoclickCountXButton >= 10) {
-                    printf("Extended Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalXButton);
+                    printf("Extended Mouse Button Autoclick detected (No Randomization): %llums delay\n", timeIntervalXButton);
                 }
 
                 autoclickCountXButton++;
             }
+
+            lastUpTimeXButton = upTimeXButton;
+        }
+
+        if (wParam == 523 || wParam == 525 && lastUpTimeXButton != 0) { // Extended mouse button is being pressed again
+            timeInterval = downTimeXButton - lastUpTimeXButton;
+            printf("Autoclicker detected in the extended mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
         }
     } else {
         printf("Autoclicker detected: Injected mouse event was triggered\n");
     }
 
-     return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
+    return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
 }
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
