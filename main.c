@@ -10,7 +10,6 @@ ULONG64 upTime;
 ULONG64 lastUpTime;
 ULONG64 timeInterval;
 
-// Separate autoclickCount variables for each mouse event
 int autoclickCountLeft = 0;
 int autoclickCountRight = 0;
 int autoclickCountMiddle = 0;
@@ -80,9 +79,11 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             lastUpTimeLeft = upTimeLeft;
         }
 
-        if (wParam == 513 || wParam == 515 && lastUpTimeLeft != 0) { // Left mouse button is being pressed again
+        if ((wParam == 513 || wParam == 515) && lastUpTimeLeft != 0) { // Left mouse button is being pressed again
             timeInterval = downTimeLeft - lastUpTimeLeft;
-            printf("Autoclicker detected in the left mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            if (timeInterval == 0) {
+                printf("Autoclicker detected in the left mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            }
         }
 
         if (wParam == 516 || wParam == 518) { // Right mouse button is being clicked or double-clicked
@@ -120,7 +121,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
         if (wParam == 516 || wParam == 518 && lastUpTimeRight != 0) { // Right mouse button is being pressed again
             timeInterval = downTimeRight - lastUpTimeRight;
+            if (timeInterval == 0) {
             printf("Autoclicker detected in the right mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            }
         }
 
         if (wParam == 519 || wParam == 521) { // Middle mouse button is being clicked or double-clicked
@@ -158,7 +161,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
         if (wParam == 519 && lastUpTimeMiddle != 0) { // Middle mouse button is being pressed again
             timeInterval = downTimeMiddle - lastUpTimeMiddle;
+            if (timeInterval == 0) {
             printf("Autoclicker detected in the middle mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            }
         }
 
         if (wParam == 523 || wParam == 525) { // Extended mouse button (XBUTTON1 or XBUTTON2) is being clicked or double-clicked
@@ -196,7 +201,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
         if (wParam == 523 || wParam == 525 && lastUpTimeXButton != 0) { // Extended mouse button is being pressed again
             timeInterval = downTimeXButton - lastUpTimeXButton;
+            if (timeInterval == 0) {
             printf("Autoclicker detected in the extended mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            }
         }
     } else {
         printf("Autoclicker detected: Injected mouse event was triggered\n");
