@@ -51,7 +51,11 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         // Left mouse button is being released
         if (wParam == 514) {
             upTimeLeft = now;
-            timeIntervalLeft = downTimeLeft - upTimeLeft;
+            if (upTimeLeft < downTimeLeft) {
+                timeIntervalLeft = (ULLONG_MAX - downTimeLeft) + upTimeLeft + 1;
+            } else {
+                timeIntervalLeft = upTimeLeft - downTimeLeft;
+            }
 
             if (timeIntervalLeft == 0) {
                 printf("Autoclicker detected in the left mouse button: Delay is 0ms.\n");
@@ -78,7 +82,11 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         // Right mouse button is being released
         if (wParam == 517) {
             upTimeRight = now;
-            timeIntervalRight = downTimeRight - upTimeRight;
+            if (upTimeRight < downTimeRight) {
+                timeIntervalRight = (ULLONG_MAX - downTimeRight) + upTimeRight + 1;
+            } else {
+                timeIntervalRight = upTimeRight - downTimeRight;
+            }
 
             if (timeIntervalRight == 0) {
                 printf("Autoclicker detected in the right mouse button: Delay is 0ms.\n");
@@ -105,7 +113,11 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         // Middle mouse button is being released
         if (wParam == 520) {
             upTimeMiddle = now;
-            timeIntervalMiddle = downTimeMiddle - upTimeMiddle;
+            if (upTimeMiddle < downTimeMiddle) {
+                timeIntervalMiddle = (ULLONG_MAX - downTimeMiddle) + upTimeMiddle + 1;
+            } else {
+                timeIntervalMiddle = upTimeMiddle - downTimeMiddle;
+            }
 
             if (timeIntervalMiddle == 0) {
                 printf("Autoclicker detected in the middle mouse button: Delay is 0ms.\n");
@@ -132,7 +144,11 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         // Extended mouse button (XBUTTON1 or XBUTTON2) is being released
         if (wParam == 524) {
             upTimeXButton = now;
-            timeIntervalXButton = downTimeXButton - upTimeXButton;
+            if (upTimeXButton < downTimeXButton) {
+                timeIntervalXButton = (ULLONG_MAX - downTimeXButton) + upTimeXButton + 1;
+            } else {
+                timeIntervalXButton = upTimeXButton - downTimeXButton;
+            }
 
             if (timeIntervalXButton == 0) {
                 printf("Autoclicker detected in the extra side mouse button: Delay is 0ms.\n");
