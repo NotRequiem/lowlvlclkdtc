@@ -61,7 +61,7 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             if (timeIntervalLeft == 0) {
                 printf("Autoclicker detected in the left mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last left mouse event and current time: %llums\n", timeIntervalLeft);
+                printf("Delay between last left press mouse event and current time: %llums\n", timeIntervalLeft);
 
                 if (autoclickCountLeft == 0) {
                     previousIntervalLeft = timeIntervalLeft;
@@ -82,7 +82,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if ((wParam == 513 || wParam == 515) && lastUpTimeLeft != 0) { // Left mouse button is being pressed again
             timeInterval = downTimeLeft - lastUpTimeLeft;
             if (timeInterval == 0) {
-                printf("Autoclicker detected in the left mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+                printf("Autoclicker detected in the left mouse button. Delay Release-To-Press is 0ms.");
+            } else {
+                printf("Delay between last left release mouse event and current time: %llums\n", timeInterval);
             }
         }
 
@@ -101,7 +103,7 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             if (timeIntervalRight == 0) {
                 printf("Autoclicker detected in the right mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last right mouse event and current time: %llums\n", timeIntervalRight);
+                printf("Delay between last right press mouse event and current time: %llums\n", timeIntervalRight);
 
                 if (autoclickCountRight == 0) {
                     previousIntervalRight = timeIntervalRight;
@@ -122,7 +124,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (wParam == 516 || wParam == 518 && lastUpTimeRight != 0) { // Right mouse button is being pressed again
             timeInterval = downTimeRight - lastUpTimeRight;
             if (timeInterval == 0) {
-            printf("Autoclicker detected in the right mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            printf("Autoclicker detected in the right mouse button. Delay Release-To-Press is 0ms.\n");
+            } else {
+                printf("Delay between last right release mouse event and current time: %llums\n", timeInterval);
             }
         }
 
@@ -139,9 +143,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             }
 
             if (timeIntervalMiddle == 0) {
-                printf("AAutoclicker detected in the middle mouse button. Delay Press-To-Release is 0ms.\n");
+                printf("Autoclicker detected in the middle mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last middle mouse event and current time: %llums\n", timeIntervalMiddle);
+                printf("Delay between last middle press mouse event and current time: %llums\n", timeIntervalMiddle);
 
                 if (autoclickCountMiddle == 0) {
                     previousIntervalMiddle = timeIntervalMiddle;
@@ -162,7 +166,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (wParam == 519 && lastUpTimeMiddle != 0) { // Middle mouse button is being pressed again
             timeInterval = downTimeMiddle - lastUpTimeMiddle;
             if (timeInterval == 0) {
-            printf("Autoclicker detected in the middle mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            printf("Autoclicker detected in the middle mouse button. Delay Release-To-Press is 0ms. \n");
+            } else {
+                printf("Delay between last middle release mouse event and current time: %llums\n", timeInterval);
             }
         }
 
@@ -181,7 +187,7 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             if (timeIntervalXButton == 0) {
                 printf("Autoclicker detected in the extended mouse button. Delay Press-To-Release is 0ms.\n");
             } else {
-                printf("Delay between last XBUTTON mouse event and current time: %llums\n", timeIntervalXButton);
+                printf("Delay between last XBUTTON press mouse event and current time: %llums\n", timeIntervalXButton);
 
                 if (autoclickCountXButton == 0) {
                     previousIntervalXButton = timeIntervalXButton;
@@ -202,7 +208,9 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (wParam == 523 || wParam == 525 && lastUpTimeXButton != 0) { // Extended mouse button is being pressed again
             timeInterval = downTimeXButton - lastUpTimeXButton;
             if (timeInterval == 0) {
-            printf("Autoclicker detected in the extended mouse button. Delay Release-To-Press is 0ms: %llums\n", timeInterval);
+            printf("Autoclicker detected in the extended mouse button. Delay Release-To-Press is 0ms.\n");
+            } else {
+                printf("Delay between last XBUTTON release mouse event and current time: %llums\n", timeInterval);
             }
         }
     } else {
