@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-HHOOK hHook;
+HHOOK hMouseHook;
+HHOOK hKeyboardHook;
 
 ULONG64 downTime;
 ULONG64 upTime;
@@ -15,21 +16,25 @@ ULONG64 downTimeLeft = 0;
 ULONG64 upTimeLeft = 0;
 ULONG64 timeIntervalLeft = 0;
 ULONG64 previousIntervalLeft = 0;
+int autoclickCountLeft = 0;
 
 ULONG64 downTimeRight = 0;
 ULONG64 upTimeRight = 0;
 ULONG64 timeIntervalRight = 0;
 ULONG64 previousIntervalRight = 0;
+int autoclickCountRight = 0;
 
 ULONG64 downTimeMiddle = 0;
 ULONG64 upTimeMiddle = 0;
 ULONG64 timeIntervalMiddle = 0;
 ULONG64 previousIntervalMiddle = 0;
+int autoclickCountMiddle = 0;
 
 ULONG64 downTimeXButton = 0;
 ULONG64 upTimeXButton = 0;
 ULONG64 timeIntervalXButton = 0;
 ULONG64 previousIntervalXButton = 0;
+int autoclickCountXButton = 0;
 
 
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -139,7 +144,7 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             if ((wParam == 524 || wParam == 523) && timeIntervalXButton == previousIntervalXButton) {
                 autoclickCountXButton++;
                 if (autoclickCountXButton == 3) {
-                    printf("Autoclick detected in the extended mouse button (No randomization): %llums delay\n", timeIntervalXButton1);
+                    printf("Autoclick detected in the extended mouse button (No randomization): %llums delay\n", timeIntervalXButton);
                 }
             } else {
                 autoclickCountXButton = 1;
@@ -149,43 +154,72 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
         printf("Autoclicker detected: Injected mouse event was triggered\n");
     }
 
-    return CallNextHookEx(hHook, nCode, wParam, lParam);
+     return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
 }
 
-void UninstallHook() {
-	if (hHook != NULL) {
-		if (!UnhookWindowsHookEx(hHook)) {
-			printf("Error uninstalling mouse hook. Error code: %d\n", GetLastError());
-		}
-		hHook = NULL;
-	}
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
+
+    if (nCode == HC_ACTION && !(p->flags & (LLKHF_INJECTED | LLKHF_LOWER_IL_INJECTED))) {
+        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
+            printf("Key Down: VK Code = %d\n", p->vkCode);
+        } else if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
+            printf("Key Up: VK Code = %d\n", p->vkCode);
+        }
+    } else {
+        printf("Autoclicker detected: Injected keyboard event was triggered\n");
+    }
+
+    return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
 }
 
-bool InstallHook() {
-	hHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)LowLevelMouseProc, GetModuleHandle(NULL), 0);
-	if (!hHook) {
-		printf("Error installing mouse hook. Error code: %d\n", GetLastError());
-		UninstallHook();
-		return false;
-	}
+void UninstallMouseHook() {
+    if (hMouseHook != NULL) {
+        if (!UnhookWindowsHookEx(hMouseHook)) {
+            printf("Error uninstalling mouse hook. Error code: %d\n", GetLastError());
+        }
+        hMouseHook = NULL;
+    }
+}
 
-	printf("Hook installed successfully.\n");
-	return true;
+void UninstallKeyboardHook() {
+    if (hKeyboardHook != NULL) {
+        if (!UnhookWindowsHookEx(hKeyboardHook)) {
+            printf("Error uninstalling keyboard hook. Error code: %d\n", GetLastError());
+        }
+        hKeyboardHook = NULL;
+    }
+}
+
+bool InstallHooks() {
+    hMouseHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)LowLevelMouseProc, GetModuleHandle(NULL), 0);
+    hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, (HOOKPROC)LowLevelKeyboardProc, GetModuleHandle(NULL), 0);
+
+    if (!hMouseHook || !hKeyboardHook) {
+        printf("Error installing hooks. Error code: %d\n", GetLastError());
+        UninstallMouseHook();
+        UninstallKeyboardHook();
+        return false;
+    }
+
+    printf("Hooks installed successfully.\n");
+    return true;
 }
 
 int main() {
-	InstallHook();
+    InstallHooks();
 
-	MSG msg;
+    MSG msg;
 
-	while (!GetAsyncKeyState(VK_DELETE)) {
-		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+    while (!GetAsyncKeyState(VK_DELETE)) {
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
 
-	UninstallHook();
+    UninstallMouseHook();
+    UninstallKeyboardHook();
 
-	return 0;
+    return 0;
 }
