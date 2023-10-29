@@ -42,7 +42,6 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
     if (nCode == HC_ACTION && !(p->flags & (LLMHF_INJECTED | LLMHF_LOWER_IL_INJECTED))) {
         ULONG64 now = GetTickCount64();
-
         // Left mouse button is being clicked or double-clicked
         if (wParam == 513 || wParam == 515) {
             downTimeLeft = now;
@@ -61,16 +60,18 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 printf("Autoclicker detected in the left mouse button: Delay is 0ms.\n");
             } else {
                 printf("Delay between last left button click and current time: %llums\n", timeIntervalLeft);
-                previousIntervalLeft = timeIntervalLeft;
-            }
 
-            if ((wParam == 513 || wParam == 514 || wParam == 515) && timeIntervalLeft == previousIntervalLeft) {
-                autoclickCountLeft++;
-                if (autoclickCountLeft == 3) {
-                    printf("Left Mouse Button Autoclick detected (No randomization): %llums delay\n", timeIntervalLeft);
+                if (autoclickCountLeft == 0) {
+                    previousIntervalLeft = timeIntervalLeft;
+                } else if (timeIntervalLeft != previousIntervalLeft) {
+                    autoclickCountLeft = 0;
                 }
-            } else {
-                autoclickCountLeft = 1;
+
+                if (autoclickCountLeft >= 10) {
+                    printf("Left Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalLeft);
+                }
+
+                autoclickCountLeft++;
             }
         }
 
@@ -92,16 +93,18 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 printf("Autoclicker detected in the right mouse button: Delay is 0ms.\n");
             } else {
                 printf("Delay between last right click and current time: %llums\n", timeIntervalRight);
-                previousIntervalRight = timeIntervalRight;
-            }
 
-            if ((wParam == 516 || wParam == 517 || wParam == 518) && timeIntervalRight == previousIntervalRight) {
-                autoclickCountRight++;
-                if (autoclickCountRight == 3) {
-                    printf("Autoclick detected in the right mouse button (No randomization): %llums delay\n", timeIntervalRight);
+                if (autoclickCountRight == 0) {
+                    previousIntervalRight = timeIntervalRight;
+                } else if (timeIntervalRight != previousIntervalRight) {
+                    autoclickCountRight = 0;
                 }
-            } else {
-                autoclickCountRight = 1;
+
+                if (autoclickCountRight >= 10) {
+                    printf("Right Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalRight);
+                }
+
+                autoclickCountRight++;
             }
         }
 
@@ -123,16 +126,18 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 printf("Autoclicker detected in the middle mouse button: Delay is 0ms.\n");
             } else {
                 printf("Delay between last middle button click and current time: %llums\n", timeIntervalMiddle);
-                previousIntervalMiddle = timeIntervalMiddle;
-            }
 
-            if ((wParam == 520 || wParam == 519) && timeIntervalMiddle == previousIntervalMiddle) {
-                autoclickCountMiddle++;
-                if (autoclickCountMiddle == 3) {
-                    printf("Autoclick detected in the middle button (No Randomization): %llums delay\n", timeIntervalMiddle);
+                if (autoclickCountMiddle == 0) {
+                    previousIntervalMiddle = timeIntervalMiddle;
+                } else if (timeIntervalMiddle != previousIntervalMiddle) {
+                    autoclickCountMiddle = 0;
                 }
-            } else {
-                autoclickCountMiddle = 1;
+
+                if (autoclickCountMiddle >= 10) {
+                    printf("Middle Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalMiddle);
+                }
+
+                autoclickCountMiddle++;
             }
         }
 
@@ -154,16 +159,18 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 printf("Autoclicker detected in the extra side mouse button: Delay is 0ms.\n");
             } else {
                 printf("Delay between last XBUTTON click and current time: %llums\n", timeIntervalXButton);
-                previousIntervalXButton = timeIntervalXButton;
-            }
 
-            if ((wParam == 524 || wParam == 523) && timeIntervalXButton == previousIntervalXButton) {
-                autoclickCountXButton++;
-                if (autoclickCountXButton == 3) {
-                    printf("Autoclick detected in the extended mouse button (No randomization): %llums delay\n", timeIntervalXButton);
+                if (autoclickCountXButton == 0) {
+                    previousIntervalXButton = timeIntervalXButton;
+                } else if (timeIntervalXButton != previousIntervalXButton) {
+                    autoclickCountXButton = 0;
                 }
-            } else {
-                autoclickCountXButton = 1;
+
+                if (autoclickCountXButton >= 10) {
+                    printf("Extended Mouse Button Autoclick detected (Randomization detected): %llums delay\n", timeIntervalXButton);
+                }
+
+                autoclickCountXButton++;
             }
         }
     } else {
