@@ -5,6 +5,15 @@
 HHOOK hMouseHook;
 HHOOK hKeyboardHook;
 
+struct KeyData {
+    int keyDownCount;
+    int keyUpCount;
+    DWORD lastKeyDownTime;
+    DWORD lastKeyUpTime;
+    DWORD lastKeyUpToKeyDownDelay;
+    DWORD lastKeyDownToKeyUpDelay;
+};
+
 ULONG64 downTime;
 ULONG64 upTime;
 ULONG64 lastUpTime;
@@ -214,23 +223,37 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
             }
         }
     } else {
-        printf("Autoclicker detected: Injected mouse event was triggered\n");
+        printf("Autoclicker detected: Injected mouse event was triggered.\n");
     }
 
     return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
 }
 
+struct KeyData keyDataMap[256] = {0};
+
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
 
     if (nCode == HC_ACTION && !(p->flags & (LLKHF_INJECTED | LLKHF_LOWER_IL_INJECTED))) {
+        DWORD currentTime = GetTickCount();
+
+        struct KeyData* keyData = &keyDataMap[p->vkCode];
+
         if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-            printf("Key Down: VK Code = %d\n", p->vkCode);
+            if (keyData->keyDownCount > 0 && (currentTime - keyData->lastKeyDownTime == 0)) {
+                printf("Autoclicker detected: Key Down with 0ms delay. VK Code = %d, Delay = %dms\n", p->vkCode, currentTime - keyData->lastKeyDownTime);
+            }
+            keyData->keyDownCount++;
+            keyData->lastKeyDownTime = currentTime;
         } else if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
-            printf("Key Up: VK Code = %d\n", p->vkCode);
+            if (keyData->keyUpCount > 0 && (currentTime - keyData->lastKeyUpTime == 0)) {
+                printf("Autoclicker detected: Key Up with 0ms delay. VK Code = %d, Delay = %dms\n", p->vkCode, currentTime - keyData->lastKeyUpTime);
+            }
+            keyData->keyUpCount++;
+            keyData->lastKeyUpTime = currentTime;
         }
     } else {
-        printf("Autoclicker detected: Injected keyboard event was triggered\n");
+        printf("Autoclicker detected: Injected keyboard event was triggered.\n");
     }
 
     return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
